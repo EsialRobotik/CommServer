@@ -5,7 +5,7 @@ Serveur de communication TCP entre les robots / logs / caméra / whatever
 ## Utilisation
 - Compiler le projet avec la task Gradle shadowJar
 - Lancer le serveur
-- Connexion au serveur par une socket sur le port 4269
+- Connexion au serveur par une socket TCP sur le port 4269
 - Envoyer une première ligne permettant l'identification du client
 
 ### Logger
