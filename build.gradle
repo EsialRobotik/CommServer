@@ -1,0 +1,35 @@
+buildscript {
+    dependencies {
+        classpath "com.github.jengelman.gradle.plugins:shadow:1.2.4"
+    }
+}
+
+plugins {
+    id 'java'
+}
+
+apply plugin: 'com.github.johnrengelman.shadow'
+
+version '1.0'
+
+sourceCompatibility = 1.8
+
+//create a single Jar with all dependencies
+shadowJar {
+    manifest {
+        attributes 'Implementation-Title': 'PrincessRabbit',
+                'Implementation-Version': version,
+                'Main-Class': 'server.Main'
+    }
+    baseName = project.name
+}
+
+repositories {
+    mavenCentral()
+    maven { url 'https://jitpack.io' }
+    jcenter()
+}
+
+dependencies {
+    testCompile group: 'junit', name: 'junit', version: '4.12'
+}
