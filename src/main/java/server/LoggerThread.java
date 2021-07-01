@@ -22,6 +22,8 @@ public class LoggerThread extends SocketThread {
                 if ((line == null) || line.equalsIgnoreCase("QUIT")) {
                     socket.close();
                     return;
+                } else if (line.length() == 0) {
+                    continue;
                 } else {
                     System.out.println("server.LoggerThread - " + line);
                     for (SocketThread loggerListener : threads.get("loggerListener")) {
