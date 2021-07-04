@@ -27,6 +27,7 @@ public class Main {
         } catch (IOException e) {
             e.printStackTrace();
         }
+
         while (true) {
             try {
                 socket = serverSocket.accept();
@@ -36,6 +37,10 @@ public class Main {
                 String line = reader.readLine();
                 System.out.println("COUCOU : " + line);
 
+                if (line == null) {
+                    continue;
+                }
+
                 if (line.contains("INFO : init logger")) {
                     SocketThread logger = new LoggerThread(socket, threads);
                     threads.get("logger").add(logger);
@@ -43,6 +48,7 @@ public class Main {
                 } else {
                     switch (line) {
                         case "loggerListener":
+                        case "GET / HTTP/1.1":
                             SocketThread loggerListener = new LoggerListenerThread(socket, threads);
                             threads.get("loggerListener").add(loggerListener);
                             loggerListener.start();
@@ -52,7 +58,7 @@ public class Main {
                             threads.get("robots").add(robotThread);
                             robotThread.start();
                             break;
-                        default:
+                        case "echo":
                             new EchoThread(socket).start();
                             break;
                     }

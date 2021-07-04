@@ -18,15 +18,20 @@ public class LoggerListenerThread extends SocketThread {
             System.out.println("server.LoggerListenerThread start");
             String line;
             while (true) {
-                line = reader.readLine();
-                if ((line == null) || line.equalsIgnoreCase("QUIT")) {
-                    socket.close();
-                    return;
-                } else {
-                    System.out.println("server.LoggerListenerThread - " + line);
-                }
+//                line = reader.readLine();
+//                if ((line == null) || line.equalsIgnoreCase("QUIT")) {
+//                    socket.close();
+//                    return;
+//                } else {
+//                    System.out.println("server.LoggerListenerThread - " + line);
+//                }
+                Thread.sleep(1000);
+                this.write("fuuuu");
+                System.out.println("fuu");
             }
-        } catch (IOException e) {
+//        } catch (IOException e) {
+//            e.printStackTrace();
+        } catch (InterruptedException e) {
             e.printStackTrace();
         }
     }
