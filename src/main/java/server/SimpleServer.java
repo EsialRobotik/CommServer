@@ -1,6 +1,12 @@
 package server;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.net.InetSocketAddress;
+import java.net.ServerSocket;
+import java.net.Socket;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -12,13 +18,52 @@ import org.java_websocket.server.WebSocketServer;
 public class SimpleServer extends WebSocketServer {
 
     HashMap<String, ArrayList<WebSocket>> connexions = new HashMap<>();
+    ServerSocket loggerServer = null;
 
     public SimpleServer(InetSocketAddress address) {
         super(address);
+        System.out.println("Simple server started");
 
         this.connexions.put("logger", new ArrayList<>());
         this.connexions.put("loggerListener", new ArrayList<>());
         this.connexions.put("robots", new ArrayList<>());
+
+        try {
+            this.loggerServer = new ServerSocket(1664);
+            System.out.println("Log server started");
+            this.runLoggerServer();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void runLoggerServer()
+    {
+        (new Thread(() -> {
+            while (true) {
+                try {
+                    Socket socket = this.loggerServer.accept();
+                    System.out.println("Connexion au logs");
+                    InputStream input = socket.getInputStream();
+                    BufferedReader reader = new BufferedReader(new InputStreamReader(input));
+                    String line = reader.readLine();
+                    System.out.println("COUCOU : " + line);
+
+                    if (line == null) {
+                        continue;
+                    }
+
+                    if (line.contains("INFO : init logger")) {
+                        LoggerListenerThread logger = new LoggerListenerThread(socket, this);
+                        logger.start();
+                    }
+
+                    Thread.sleep(5);
+                } catch (IOException | InterruptedException e) {
+                    System.out.println("I/O error: " + e);
+                }
+            }
+        })).start();
     }
 
     @Override
@@ -56,6 +101,9 @@ public class SimpleServer extends WebSocketServer {
                 channel = "logger";
             } else {
                 switch (message) {
+                    case "logger":
+                        channel = "logger";
+                        break;
                     case "loggerListener":
                         channel = "loggerListener";
                         break;
@@ -85,6 +133,9 @@ public class SimpleServer extends WebSocketServer {
         System.out.println("server started successfully");
     }
 
+    public void broadcastLogMessage(String message) {
+        broadcast(message, this.connexions.get("loggerListener"));
+    }
 
     public static void main(String[] args) {
         String host = "localhost";

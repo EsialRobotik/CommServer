@@ -19,7 +19,7 @@ shadowJar {
     manifest {
         attributes 'Implementation-Title': 'PrincessRabbit',
                 'Implementation-Version': version,
-                'Main-Class': 'server.Main'
+                'Main-Class': 'server.SimpleServer'
     }
     baseName = project.name
 }
