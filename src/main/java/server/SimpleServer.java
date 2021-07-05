@@ -76,15 +76,18 @@ public class SimpleServer extends WebSocketServer {
     @Override
     public void onClose(WebSocket conn, int code, String reason, boolean remote) {
         System.out.println("closed " + conn.getRemoteSocketAddress() + " with exit code " + code + " additional info: " + reason);
+        if (this.connexions.get("loggerListener").contains(conn)) {
+            this.connexions.get("loggerListener").remove(conn);
+        }
+        if (this.connexions.get("robot").contains(conn)) {
+            this.connexions.get("robot").remove(conn);
+        }
     }
 
     @Override
     public void onMessage(WebSocket conn, String message) {
         System.out.println("received message from "	+ conn.getRemoteSocketAddress() + ": " + message);
-        if (this.connexions.get("logger").contains(conn)) {
-            // On reçoit des logs
-            broadcast(message, this.connexions.get("loggerListener"));
-        } else if (this.connexions.get("loggerListener").contains(conn)) {
+        if (this.connexions.get("loggerListener").contains(conn)) {
             // On veut écouter des logs
         } else if (this.connexions.get("robots").contains(conn)) {
             // Un robot annonce un truc
@@ -97,23 +100,18 @@ public class SimpleServer extends WebSocketServer {
             broadcast(message, robotSockets);
         } else {
             String channel = null;
-            if (message.contains("INFO : init logger")) {
-                channel = "logger";
-            } else {
-                switch (message) {
-                    case "logger":
-                        channel = "logger";
-                        break;
-                    case "loggerListener":
-                        channel = "loggerListener";
-                        break;
-                    case "robot":
-                        channel = "robots";
-                        break;
-                }
+            switch (message) {
+                case "loggerListener":
+                    channel = "loggerListener";
+                    break;
+                case "robot":
+                    channel = "robots";
+                    break;
             }
             if (channel != null) {
                 this.connexions.get(channel).add(conn);
+            } else {
+                System.out.println("No channel for " + message);
             }
         }
     }
