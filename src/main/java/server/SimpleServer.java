@@ -136,7 +136,7 @@ public class SimpleServer extends WebSocketServer {
     }
 
     public static void main(String[] args) {
-        String host = "192.168.0.104";
+        String host = "192.168.42.103";
         int port = 4269;
 
         WebSocketServer server = new SimpleServer(new InetSocketAddress(host, port));
