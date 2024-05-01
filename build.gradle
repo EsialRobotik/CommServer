@@ -6,13 +6,26 @@ buildscript {
 
 plugins {
     id 'java'
+    id 'org.hidetake.ssh' version '2.10.1'
+    id "com.github.johnrengelman.shadow" version "7.1.2"
 }
 
-apply plugin: 'com.github.johnrengelman.shadow'
+ssh.settings {
+    dryRun = project.hasProperty('dryRun')
+    knownHosts = allowAnyHosts
+}
 
 version '1.0'
 
 sourceCompatibility = 1.8
+
+remotes {
+    princessRabbit {
+        host = princessRabbitSettingsHost
+        user = princessRabbitSettingsUser
+        identity = file("${System.properties['user.home']}/.ssh/id_rsa")
+    }
+}
 
 //create a single Jar with all dependencies
 shadowJar {
@@ -22,6 +35,17 @@ shadowJar {
                 'Main-Class': 'server.SimpleServer'
     }
     baseName = project.name
+}
+
+task deployPrincessRabbit(dependsOn: ["shadowJar"]) {
+    doLast {
+        ssh.run {
+            session(remotes.princessRabbit) {
+                put from: projectHome + '/build/libs/esialrobotik.princessrabbit-1.0-all.jar', into: '/home/pi'
+                execute 'sudo sync'
+            }
+        }
+    }
 }
 
 repositories {
